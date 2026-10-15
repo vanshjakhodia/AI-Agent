@@ -1,10 +1,21 @@
 """Autonomous AI Agent Orchestrator.
 
-Combines:
-- LLM (Reasoning & Planning)
-- Memory (Short-term conversation context + Long-term persistent contacts and audit log)
-- Tools (Contact Lookup, Contact Add, Email Drafter, Safety Guardrails, SMTP Sender)
-- Orchestration (ReAct-style state-machine loop with anti-hallucination & safety constraints)
+Governed by the Master System Prompt across all 9 domains:
+- General Intelligence
+- Research & Web Intelligence
+- Programming & Software Development (Code execution & verification)
+- Business & Productivity (Email communications & structured reporting)
+- Documents & Knowledge (Workspace file reading, writing, searching)
+- Personal Assistance (Reminders & schedules)
+- Creative Work (Presentations, design concepts, storytelling)
+- Data & Decision Support (Calculations, analysis, tables)
+- Automation & Task Tracking (Section 9 Task Records & 8-step operating cycle)
+
+Strictly adheres to:
+- Operating principles (8-step execution loop)
+- Safety guardrails (Zero unauthorized irreversible actions)
+- Anti-hallucination policies
+- Zero-emoji professional interface
 """
 
 from __future__ import annotations
@@ -26,6 +37,10 @@ from agent.tools.contacts_tool import ContactLookupTool, ContactAddTool
 from agent.tools.draft_tool import DraftEmailTool
 from agent.tools.guardrail_tool import SafetyGuardrailTool
 from agent.tools.smtp_tool import SMTPSenderTool
+from agent.tools.code_exec_tool import CodeExecutionTool
+from agent.tools.web_search_tool import WebSearchTool
+from agent.tools.document_tool import DocumentTool
+from agent.tools.task_manager_tool import TaskManagerTool, TaskRecord, TaskStatus
 from agent.llm.base import BaseLLMClient, LLMPlan
 from agent.llm.factory import get_llm_client
 
@@ -33,7 +48,7 @@ EMAIL_REGEX = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
 
 
 class AIAgent:
-    """Production-grade AI Agent with safety guardrails and anti-hallucination."""
+    """Production-grade Autonomous AI Agent with multi-domain tools and safety guardrails."""
 
     def __init__(
         self,
@@ -65,12 +80,16 @@ class AIAgent:
             dry_run=self.config.dry_run,
             outbox_dir=self.config.outbox_dir,
         )
+        self.code_tool = CodeExecutionTool()
+        self.web_tool = WebSearchTool()
+        self.doc_tool = DocumentTool()
+        self.task_tool = TaskManagerTool()
 
         # 3. LLM Reasoning Subsystem
         self.llm = llm_client or get_llm_client()
 
     def process(self, user_input: str) -> AgentResult:
-        """Main agent processing turn: perceive, reason, plan, act, and remember."""
+        """Main agent operating turn executing the 8-step cycle."""
         user_input_clean = user_input.strip()
         self.short_term_memory.add_turn("user", user_input_clean)
 
@@ -78,7 +97,7 @@ class AIAgent:
         if self.state == AgentLifecycleState.AWAITING_CONTACT_INFO and self.short_term_memory.pending_missing_contact_name:
             return self._handle_provided_missing_contact(user_input_clean)
 
-        # Get LLM Reasoning & Plan
+        # Step 1 & 2: Perceive, Understand & Assess via LLM / Deterministic Planner
         contacts_summary = ", ".join(f"{c.name} <{c.email}>" for c in self.contacts_store.list_all())
         last_draft_dict = self.short_term_memory.get_last_draft().to_dict() if self.short_term_memory.get_last_draft() else None
         history_text = self.short_term_memory.get_conversation_history_text()
@@ -90,7 +109,7 @@ class AIAgent:
             contacts_summary=contacts_summary,
         )
 
-        # Route based on detected intent
+        # Step 3, 4, 5: Plan, Select Tools & Execute
         if plan.intent == "confirm_send":
             return self._handle_confirmation()
 
@@ -106,18 +125,198 @@ class AIAgent:
         if plan.intent == "provide_contact" and self.state == AgentLifecycleState.AWAITING_CONTACT_INFO:
             return self._handle_provided_missing_contact(user_input_clean)
 
+        if plan.intent == "execute_code":
+            return self._handle_execute_code(plan)
+
+        if plan.intent == "web_search":
+            return self._handle_web_search(plan)
+
+        if plan.intent == "document_ops":
+            return self._handle_document_ops(plan)
+
+        if plan.intent == "task_ops":
+            return self._handle_task_ops(plan)
+
         if plan.intent == "compose_email":
             return self._handle_compose_email(plan)
 
-        # Default fallback / Help
+        # Default fallback / General intelligence
+        return self._handle_general_query(user_input_clean)
+
+    def _handle_execute_code(self, plan: LLMPlan) -> AgentResult:
+        """Executes code or evaluates mathematical expressions via CodeExecutionTool."""
+        self.state = AgentLifecycleState.EXECUTING
+        res = self.code_tool.run(code=plan.code or "", expression=plan.expression or "")
+        self.state = AgentLifecycleState.IDLE
+
+        if res.get("success"):
+            if "expression" in res:
+                out_msg = (
+                    f"**Mathematical Evaluation Result:**\n\n"
+                    f"• **Expression:** `{res.get('expression')}`\n"
+                    f"• **Computed Value:** `{res.get('result')}`\n"
+                    f"• **Execution Duration:** {res.get('duration_seconds')}s"
+                )
+            else:
+                out_msg = (
+                    f"**Code Execution Successful:**\n\n"
+                    f"```python\n{res.get('code')}\n```\n\n"
+                    f"**Output (stdout):**\n"
+                    f"```\n{res.get('stdout')}\n```\n"
+                    f"• **Exit Code:** {res.get('exit_code')}\n"
+                    f"• **Duration:** {res.get('duration_seconds')}s"
+                )
+        else:
+            out_msg = (
+                f"**Code Execution Error:**\n\n"
+                f"• **Error Message:** {res.get('error')}\n"
+                f"```\n{res.get('stderr')}\n```"
+            )
+
+        self.short_term_memory.add_turn("assistant", out_msg)
+        return AgentResult(
+            message=out_msg,
+            state=self.state,
+            action_taken="code_execution",
+            tool_output=res,
+        )
+
+    def _handle_web_search(self, plan: LLMPlan) -> AgentResult:
+        """Performs web research and synthesizes verified sources."""
+        self.state = AgentLifecycleState.EXECUTING
+        query = plan.query or "General AI Agent Research"
+        res = self.web_tool.run(query=query)
+        self.state = AgentLifecycleState.IDLE
+
+        lines = [
+            f"**Research Results for:** \"{query}\"\n",
+            f"**Sources Found:** {res.get('count', 0)}\n",
+        ]
+        for idx, item in enumerate(res.get("results", []), 1):
+            lines.append(f"{idx}. **{item.get('title')}**")
+            lines.append(f"   URL: {item.get('url')}")
+            lines.append(f"   Summary: {item.get('snippet')}\n")
+
+        msg = "\n".join(lines)
+        self.short_term_memory.add_turn("assistant", msg)
+        return AgentResult(
+            message=msg,
+            state=self.state,
+            action_taken="web_search",
+            tool_output=res,
+        )
+
+    def _handle_document_ops(self, plan: LLMPlan) -> AgentResult:
+        """Performs local document management operations."""
+        self.state = AgentLifecycleState.EXECUTING
+        action = plan.doc_action or "list"
+        res = self.doc_tool.run(
+            action=action,
+            file_path=plan.doc_path or "",
+            content=plan.doc_content or "",
+            query=plan.query or "",
+        )
+        self.state = AgentLifecycleState.IDLE
+
+        if not res.get("success"):
+            msg = f"**Document Operation Failed:** {res.get('error')}"
+        elif action == "read":
+            msg = (
+                f"**File Content: `{res.get('file_path')}`** ({res.get('lines_count')} lines, {res.get('size_bytes')} bytes)\n\n"
+                f"```\n{res.get('content')}\n```"
+            )
+        elif action == "write":
+            msg = f"**File Written Successfully:** `{res.get('file_path')}` ({res.get('bytes_written')} bytes)."
+        elif action == "list":
+            lines = [f"**Workspace Directory: `{res.get('directory')}`** ({res.get('count')} items)\n"]
+            for item in res.get("items", []):
+                kind = "Directory" if item["is_dir"] else f"File ({item['size']} B)"
+                lines.append(f"• `{item['name']}` — {kind}")
+            msg = "\n".join(lines)
+        elif action == "search":
+            lines = [f"**Search Matches for \"{res.get('query')}\":** ({res.get('count')} files)\n"]
+            for m in res.get("matches", []):
+                lines.append(f"• `{m['file']}` ({m['occurrences']} occurrences)")
+            msg = "\n".join(lines)
+        else:
+            msg = f"Document action '{action}' completed."
+
+        self.short_term_memory.add_turn("assistant", msg)
+        return AgentResult(
+            message=msg,
+            state=self.state,
+            action_taken="document_operation",
+            tool_output=res,
+        )
+
+    def _handle_task_ops(self, plan: LLMPlan) -> AgentResult:
+        """Manages structured Section 9 Task Records."""
+        action = plan.task_action or "get"
+        res = self.task_tool.run(
+            action=action,
+            objective=plan.task_objective or "",
+            steps=plan.task_steps or [
+                "Understand user requirements",
+                "Select and verify appropriate tools",
+                "Execute permitted actions safely",
+                "Deliver verified outcome",
+            ],
+        )
+
+        if not res.get("success"):
+            msg = f"**Task Management Error:** {res.get('error')}"
+        elif action == "create":
+            t = res["task"]
+            steps_str = "\n".join(f"  {idx+1}. {s}" for idx, s in enumerate(t['planned_steps']))
+            msg = (
+                f"**Task Tracking Record Initialized (Section 9 Compliance):**\n\n"
+                f"• **Task ID:** `{t['task_id']}`\n"
+                f"• **Objective:** {t['objective']}\n"
+                f"• **Execution Status:** {t['execution_status']}\n"
+                f"• **Next Immediate Action:** {t['next_immediate_action']}\n\n"
+                f"**Planned Steps:**\n{steps_str}"
+            )
+        elif action == "list":
+            tasks = res.get("tasks", [])
+            if not tasks:
+                msg = "No tasks currently registered in the task tracker."
+            else:
+                lines = [f"**Active Task Tracker ({len(tasks)} recorded tasks):**\n"]
+                for t in tasks:
+                    lines.append(f"• [`{t['task_id']}`] **{t['objective']}** — Status: *{t['execution_status']}*")
+                msg = "\n".join(lines)
+        else:
+            t = res.get("task")
+            if not t:
+                msg = "No active task in memory."
+            else:
+                msg = (
+                    f"**Current Task State:**\n\n"
+                    f"• **Task ID:** `{t['task_id']}`\n"
+                    f"• **Objective:** {t['objective']}\n"
+                    f"• **Status:** {t['execution_status']}\n"
+                    f"• **Next Action:** {t['next_immediate_action']}"
+                )
+
+        self.short_term_memory.add_turn("assistant", msg)
+        return AgentResult(
+            message=msg,
+            state=self.state,
+            action_taken="task_tracking",
+            task_record=res.get("task"),
+        )
+
+    def _handle_general_query(self, user_input: str) -> AgentResult:
+        """General Intelligence response adhering to 8-step operating principles."""
         help_msg = (
-            "I am your autonomous AI Agent. Here is what I can do:\n"
-            "• Draft and send emails: e.g. \"Send an email to John reminding him about tomorrow's 10 AM meeting\"\n"
-            "• Submit assignments: e.g. \"Send an email to Dr. Kunal Meher submitting my Experiment 9 AI Agent assignment\"\n"
-            "• Reuse context: e.g. \"Send the same email to Sarah too\"\n"
-            "• View contacts: \"Show contacts\"\n"
-            "• View sent history: \"View history\"\n\n"
-            "How may I assist you?"
+            "I am your Autonomous AI Agent, operating across all core domains:\n\n"
+            "1. **General Intelligence & Reasoning:** Problem solving, analysis, and concept explanations.\n"
+            "2. **Research & Web Intelligence:** Query web sources, compare evidence, and synthesize findings (`search web for <query>`).\n"
+            "3. **Programming & Software Development:** Execute Python code and math evaluations (`run code: <script>` or `calculate <expression>`).\n"
+            "4. **Business & Communications:** Draft and send emails via live Google SMTP or simulated dry-run (`send an email to <recipient>`).\n"
+            "5. **Documents & Knowledge:** Read, write, search, and list workspace documents (`read file <path>`, `list files`).\n"
+            "6. **Task Tracking & Automation:** Full Section 9 task state management (`create task: <goal>`, `list tasks`).\n\n"
+            "How can I assist you today?"
         )
         self.state = AgentLifecycleState.IDLE
         self.short_term_memory.add_turn("assistant", help_msg)
@@ -162,7 +361,6 @@ class AIAgent:
                 # Contact NOT found! Refuse to hallucinate address. Ask user for information.
                 self.state = AgentLifecycleState.AWAITING_CONTACT_INFO
                 self.short_term_memory.set_missing_contact_name(recipient_name)
-                # Store pending composition parameters in active context
                 self.short_term_memory.active_context = {
                     "recipient_name": recipient_name,
                     "subject": subject,
@@ -170,9 +368,10 @@ class AIAgent:
                     "tone": tone,
                 }
                 ask_msg = (
-                    f"⚠️ Anti-Hallucination Guardrail: I could not find '{recipient_name}' in your contacts address book.\n"
-                    f"To prevent sending to an incorrect address, please provide {recipient_name}'s email address (e.g., username@domain.com)."
+                    f"Anti-Hallucination Guardrail: Could not find '{recipient_name}' in your contacts address book.\n"
+                    f"To prevent dispatching to an incorrect address, please provide {recipient_name}'s email address (e.g., username@domain.com)."
                 )
+
                 self.short_term_memory.add_turn("assistant", ask_msg)
                 return AgentResult(message=ask_msg, state=self.state)
 
@@ -199,13 +398,13 @@ class AIAgent:
         if not guard_res["allowed"]:
             self.state = AgentLifecycleState.AWAITING_CONFIRMATION
             confirm_prompt = (
-                f"📝 **Email Draft Prepared (Review & Confirmation Required)**\n\n"
+                f"**Email Draft Prepared (Review & Confirmation Required)**\n\n"
                 f"• **Recipient:** {draft.recipient_name} (`{draft.recipient_email}`)\n"
                 f"• **Subject:** {draft.subject}\n"
                 f"• **Tone:** {draft.tone.value if isinstance(draft.tone, ToneType) else draft.tone}\n\n"
                 f"**Body Preview:**\n"
                 f"```\n{draft.body}\n```\n\n"
-                f"🛡️ **Safety Guardrail:** Sending an email is an irreversible action. "
+                f"[SAFETY GUARDRAIL]: Sending an email is an irreversible action. "
                 f"Would you like me to send this email now? Reply **'Yes'** to send or **'No'** to cancel."
             )
             self.short_term_memory.add_turn("assistant", confirm_prompt)
@@ -228,7 +427,6 @@ class AIAgent:
             self.short_term_memory.add_turn("assistant", msg)
             return AgentResult(message=msg, state=AgentLifecycleState.IDLE)
 
-        # Safety guardrail check with user_confirmed=True
         guard_res = self.guardrail_tool.run(action_type="send_email", user_confirmed=True)
         if not guard_res["allowed"]:
             msg = f"Action blocked by safety policy: {guard_res['reason']}"
@@ -244,11 +442,10 @@ class AIAgent:
 
         if not smtp_res.get("success"):
             self.state = AgentLifecycleState.ERROR
-            err_msg = f"❌ Dispatch Failed: {smtp_res.get('error')}"
+            err_msg = f"[DISPATCH FAILED]: {smtp_res.get('error')}"
             self.short_term_memory.add_turn("assistant", err_msg)
             return AgentResult(message=err_msg, state=self.state, draft=draft)
 
-        # Successfully sent or simulated dry-run
         record = SentRecord(
             record_id=smtp_res["record"]["record_id"],
             draft_id=draft.draft_id,
@@ -262,13 +459,12 @@ class AIAgent:
             message_id=smtp_res["record"].get("message_id"),
         )
 
-        # Remember in short-term and long-term memory
         self.short_term_memory.record_sent(record)
         self.audit_log.record(record)
         self.state = AgentLifecycleState.IDLE
 
         success_msg = (
-            f"✅ **Email Sent Successfully!**\n\n"
+            f"**Email Sent Successfully:**\n\n"
             f"• **Recipient:** {record.recipient_name} (`{record.recipient_email}`)\n"
             f"• **Subject:** {record.subject}\n"
             f"• **Status:** {record.status}\n"
@@ -293,7 +489,7 @@ class AIAgent:
             self.short_term_memory.clear_pending_draft()
 
         self.state = AgentLifecycleState.IDLE
-        cancel_msg = "🛑 Action cancelled. The email draft has been discarded and no email was sent."
+        cancel_msg = "[ACTION CANCELLED]: The email draft has been discarded and no email was sent."
         self.short_term_memory.add_turn("assistant", cancel_msg)
         return AgentResult(message=cancel_msg, state=self.state, action_taken="draft_cancelled")
 
@@ -304,31 +500,27 @@ class AIAgent:
 
         if not found_emails:
             retry_msg = (
-                f"I could not detect a valid email address in '{user_input}'. "
+                f"Could not detect a valid email address in '{user_input}'. "
                 f"Please provide a valid email format for {missing_name} (e.g. name@domain.com) or type 'cancel'."
             )
             self.short_term_memory.add_turn("assistant", retry_msg)
             return AgentResult(message=retry_msg, state=self.state)
 
         email = found_emails[0].lower()
-        # Add to contacts store
-        add_res = self.add_contact_tool.run(
+        self.add_contact_tool.run(
             name=missing_name,
             email=email,
             notes="Added dynamically during conversation flow",
         )
 
-        # Retrieve saved context to resume drafting
         ctx = self.short_term_memory.active_context or {}
         subject = ctx.get("subject", "Important Update")
         body = ctx.get("body", "Please see the following update.")
         tone = ctx.get("tone", "professional")
 
-        # Clear missing contact state
         self.short_term_memory.set_missing_contact_name(None)
         self.short_term_memory.active_context.clear()
 
-        # Resume drafting
         resume_plan = LLMPlan(
             intent="compose_email",
             recipient_name=missing_name,
@@ -346,7 +538,7 @@ class AIAgent:
         if not contacts:
             msg = "Your contacts store is currently empty."
         else:
-            lines = ["📖 **Contacts Address Book:**"]
+            lines = ["**Contacts Address Book:**"]
             for c in contacts:
                 role_str = f" ({c.role})" if c.role else ""
                 lines.append(f"• **{c.name}**{role_str}: `{c.email}`")
@@ -361,7 +553,7 @@ class AIAgent:
         if not recent:
             msg = "No emails have been sent yet."
         else:
-            lines = ["📜 **Recent Sent Emails Audit Log:**"]
+            lines = ["**Recent Sent Emails Audit Log:**"]
             for r in reversed(recent):
                 mode_tag = "[Dry-Run]" if r.is_dry_run else "[Live]"
                 lines.append(f"• {mode_tag} **{r.sent_at[:19]}** to **{r.recipient_name}** (`{r.recipient_email}`)\n  Subject: *{r.subject}*")

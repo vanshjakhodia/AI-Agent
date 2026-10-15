@@ -173,3 +173,18 @@ class AgentResult:
     action_taken: Optional[str] = None
     requires_confirmation: bool = False
     sent_record: Optional[SentRecord] = None
+    tool_output: Optional[Dict[str, Any]] = None
+    task_record: Optional[Dict[str, Any]] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "message": self.message,
+            "state": self.state.value if isinstance(self.state, AgentLifecycleState) else str(self.state),
+            "draft": self.draft.to_dict() if self.draft else None,
+            "action_taken": self.action_taken,
+            "requires_confirmation": self.requires_confirmation,
+            "sent_record": self.sent_record.to_dict() if self.sent_record else None,
+            "tool_output": self.tool_output,
+            "task_record": self.task_record,
+        }
+

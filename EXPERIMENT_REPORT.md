@@ -144,7 +144,8 @@ X-AI-Agent-Guardrail-Verification: Explicit Human-in-the-Loop Confirmation Verif
 Every email dispatched by the agent contains an executive verification box:
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│ 🤖 AI AGENT PROVENANCE & EXECUTION TELEMETRY                   │
+│ [PROVENANCE] AI AGENT TELEMETRY                                │
+
 ├────────────────────────────────────────────────────────────────┤
 │ • Engine: Autonomous AI Agent v2.1                             │
 │ • Architecture: LLM Reasoning + Memory + Tools + Orchestration │

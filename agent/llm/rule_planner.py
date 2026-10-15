@@ -78,7 +78,6 @@ class RuleBasedPlanner(BaseLLMClient):
         found_emails = EMAIL_REGEX.findall(text)
         if found_emails and ("@" in text) and len(text.split()) <= 6:
             email = found_emails[0]
-            # Try to infer name from preceding words or email prefix
             words = [w for w in text.replace(email, "").strip().split() if w.lower() not in ("is", "it's", "email", ":", "=")]
             name = " ".join(words).strip() if words else email.split("@")[0].capitalize()
             return LLMPlan(
@@ -88,12 +87,89 @@ class RuleBasedPlanner(BaseLLMClient):
                 reasoning=f"User provided email address '{email}'."
             )
 
-        # 6. Check for Context Reuse ("send the same email to Sarah too")
+        # 6. Check for Task Tracking Operations (Section 9)
+        if lower.startswith("create task:") or lower.startswith("new task:") or lower.startswith("add task:"):
+            obj = text.split(":", 1)[1].strip()
+            return LLMPlan(
+                intent="task_ops",
+                task_action="create",
+                task_objective=obj,
+                reasoning=f"Identified task creation request with objective '{obj}'."
+            )
+        if any(k in lower for k in ["list tasks", "show tasks", "get task", "task status", "view tasks"]):
+            return LLMPlan(
+                intent="task_ops",
+                task_action="list" if "list" in lower or "show" in lower else "get",
+                reasoning="User requested task tracking status."
+            )
+
+        # 7. Check for Code Execution & Calculator
+        if lower.startswith("run code:") or lower.startswith("python:") or lower.startswith("exec:"):
+            code_snippet = text.split(":", 1)[1].strip()
+            return LLMPlan(
+                intent="execute_code",
+                code=code_snippet,
+                reasoning="User explicitly commanded Python code execution."
+            )
+        if lower.startswith("calculate ") or lower.startswith("calc ") or lower.startswith("eval "):
+            expr = re.sub(r"^(calculate|calc|eval)\s+", "", text, flags=re.IGNORECASE).strip()
+            return LLMPlan(
+                intent="execute_code",
+                expression=expr,
+                reasoning=f"Identified mathematical evaluation expression '{expr}'."
+            )
+
+        # 8. Check for Document Operations
+        if lower.startswith("read file ") or lower.startswith("view file ") or lower.startswith("cat "):
+            path = re.sub(r"^(read file|view file|cat)\s+", "", text, flags=re.IGNORECASE).strip()
+            return LLMPlan(
+                intent="document_ops",
+                doc_action="read",
+                doc_path=path,
+                reasoning=f"Identified document read request for '{path}'."
+            )
+        if lower.startswith("write file ") or lower.startswith("write to file "):
+            # Format: write file <path>: <content>
+            parts = re.sub(r"^(write file|write to file)\s+", "", text, flags=re.IGNORECASE).split(":", 1)
+            path = parts[0].strip()
+            content = parts[1].strip() if len(parts) > 1 else ""
+            return LLMPlan(
+                intent="document_ops",
+                doc_action="write",
+                doc_path=path,
+                doc_content=content,
+                reasoning=f"Identified document write request for '{path}'."
+            )
+        if lower in ["list files", "show files", "ls", "dir"]:
+            return LLMPlan(
+                intent="document_ops",
+                doc_action="list",
+                doc_path="",
+                reasoning="Identified workspace file listing request."
+            )
+        if lower.startswith("search files for ") or lower.startswith("search docs for "):
+            query = re.sub(r"^(search files for|search docs for)\s+", "", text, flags=re.IGNORECASE).strip()
+            return LLMPlan(
+                intent="document_ops",
+                doc_action="search",
+                query=query,
+                reasoning=f"Identified document search query '{query}'."
+            )
+
+        # 9. Check for Web Research & Search
+        if lower.startswith("search web for ") or lower.startswith("search web ") or lower.startswith("research ") or lower.startswith("web search:"):
+            q = re.sub(r"^(search web for|search web|research|web search:)\s*", "", text, flags=re.IGNORECASE).strip()
+            return LLMPlan(
+                intent="web_search",
+                query=q,
+                reasoning=f"Identified web research query '{q}'."
+            )
+
+        # 10. Check for Context Reuse ("send the same email to Sarah too")
         for pat in self.REUSE_PATTERNS:
             match = re.search(pat, lower)
             if match:
                 target_raw = match.group(1).strip()
-                # Clean up punctuation or trailing words like "too", "please"
                 target_name = re.sub(r"\b(too|as well|also|please)\b", "", target_raw, flags=re.IGNORECASE).strip()
                 if last_draft:
                     return LLMPlan(
@@ -113,7 +189,7 @@ class RuleBasedPlanner(BaseLLMClient):
                         reasoning=f"User requested reuse for '{target_name}', but no prior draft is in memory."
                     )
 
-        # 7. Check for Email Composition
+        # 11. Check for Email Composition
         is_email_intent = any(keyword in lower for keyword in ["send an email", "send email", "email to", "send a mail", "write an email", "mail to", "message to"])
 
         if is_email_intent:
@@ -134,14 +210,13 @@ class RuleBasedPlanner(BaseLLMClient):
                 reasoning=f"Extracted email intent for recipient '{recipient_name}' with {tone} tone and subject '{subject}'."
             )
 
-        # Default fallback: General conversation / instructions
+        # Default fallback: General conversation / reasoning
         return LLMPlan(
             intent="chat",
-            reasoning="User entered general input; providing assistance guidance."
+            reasoning="User entered general input; providing comprehensive assistance guidance."
         )
 
     def _extract_recipient_name(self, text: str) -> Optional[str]:
-        # Specific known targets
         lower = text.lower()
         if "dr. kunal meher" in lower or "dr kunal meher" in lower or "dr. kunal" in lower or "kunal meher" in lower or "prof meher" in lower:
             return "Dr. Kunal Meher"
@@ -167,6 +242,7 @@ class RuleBasedPlanner(BaseLLMClient):
 
         return None
 
+
     def _detect_tone(self, text: str) -> str:
         lower = text.lower()
         for tone, keywords in self.TONE_KEYWORDS.items():
@@ -176,60 +252,48 @@ class RuleBasedPlanner(BaseLLMClient):
 
     def _infer_subject(self, text: str, recipient_name: Optional[str]) -> str:
         lower = text.lower()
+        match = re.search(r"(?:about|regarding|subject[:\s]+)\s+(.+?)(?:$|\.|\n)", text, re.IGNORECASE)
+        if match:
+            raw = match.group(1).strip()
+            return raw[0].upper() + raw[1:]
 
-        if "experiment 9" in lower or "ai agent" in lower or "assignment" in lower or "submission" in lower:
-            return "Submission: Experiment 9 - Autonomous AI Agent"
+        if "experiment 9" in lower:
+            return "Submission: Experiment 9 AI Agent Assignment"
+        if "assignment" in lower or "experiment" in lower:
+            return "Submission: Autonomous AI Agent Assignment"
+
         if "meeting" in lower:
-            time_match = re.search(r"\b(\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)?)\b", text)
-            time_str = f" at {time_match.group(1)}" if time_match else ""
-            return f"Meeting Reminder: Tomorrow{time_str}"
-        if "review" in lower:
-            return "Project Review & Feedback Request"
+            return "Meeting Request and Schedule Confirmation"
+        if "reminder" in lower:
+            return "Gentle Reminder"
         if "update" in lower:
-            return "Project Status & Important Updates"
+            return "Project Status and Updates"
 
-        # Default clean subject
-        clean_name = recipient_name or "Colleague"
-        return f"Important Update for {clean_name}"
+        return "Important Communication"
 
     def _generate_body(self, text: str, recipient_name: Optional[str], subject: str, tone: str) -> str:
-        name = recipient_name or "there"
+        salutation = f"Dear {recipient_name}," if recipient_name else "Hello,"
+        signoff = "Best regards,\nVansh Jakhodia"
+
         lower = text.lower()
-
-        # Custom tailored bodies for common realistic academic / business prompts
-        if "experiment 9" in lower or "assignment" in lower or "submission" in lower or "kunal" in lower:
-            return (
-                f"Dear {name},\n\n"
-                f"I hope this email finds you well.\n\n"
-                f"I am pleased to submit my completed work for Experiment 9: Build an AI Agent.\n\n"
-                f"The autonomous AI Agent architecture incorporates all four fundamental pillars:\n"
-                f"1. LLM Reasoning & Planning: Autonomous intent extraction, entity parsing, and tone-adaptive generation\n"
-                f"2. Working Memory: Short-term contextual state reuse across turns and long-term persistent contact & audit storage\n"
-                f"3. Tool Suite: Strict anti-hallucination contact resolution, MIME draft creation, and Gmail SMTP transmission\n"
-                f"4. Orchestration & Guardrails: State machine with human-in-the-loop verification for irreversible external actions\n\n"
-                f"This email was generated and dispatched through the AI Agent's verified SMTP pipeline.\n\n"
-                f"Best regards,\n"
-                f"Vansh Jakhodia"
+        if "experiment" in lower or "assignment" in lower:
+            body_content = (
+                f"I am writing to submit my completed assignment on the Autonomous AI Agent architecture.\n\n"
+                f"The implementation includes multi-domain tool orchestration, deterministic reasoning, "
+                f"short and long-term memory systems, safety guardrails, and verified execution capabilities.\n\n"
+                f"Please let me know if you require any additional details or documentation."
+            )
+        elif "remind" in lower or "meeting" in lower:
+            body_content = (
+                f"I hope this message finds you well.\n\n"
+                f"This is a brief follow-up regarding our upcoming schedule. "
+                f"Please let me know if the proposed timing works or if we should make any adjustments."
+            )
+        else:
+            body_content = (
+                f"I hope you are doing well.\n\n"
+                f"I am reaching out regarding {subject.lower()}.\n"
+                f"Please review the information at your convenience and let me know your thoughts."
             )
 
-        if "tomorrow's 10 am meeting" in lower or ("meeting" in lower and "10" in lower):
-            salutation = f"Hi {name}," if tone in ("casual", "friendly") else f"Dear {name},"
-            return (
-                f"{salutation}\n\n"
-                f"This is a gentle reminder regarding our scheduled meeting tomorrow at 10:00 AM.\n\n"
-                f"Please let me know if you need to review the agenda items beforehand or if there are any conflicts.\n\n"
-                f"Looking forward to connecting.\n\n"
-                f"Best regards,\n"
-                f"AI Agent"
-            )
-
-        # General reminder / prompt
-        salutation = f"Hello {name},"
-        return (
-            f"{salutation}\n\n"
-            f"I am writing regarding {subject.lower()}.\n\n"
-            f"Details: {text}\n\n"
-            f"Please feel free to reach out if you have any questions or require additional details.\n\n"
-            f"Best regards,\n"
-            f"AI Agent"
-        )
+        return f"{salutation}\n\n{body_content}\n\n{signoff}"

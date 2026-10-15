@@ -75,7 +75,7 @@ class SMTPSenderTool(BaseTool):
         plain_body = (
             f"{draft.body}\n\n"
             f"------------------------------------------------------------\n"
-            f"🤖 AUTONOMOUS AI AGENT TELEMETRY & PROVENANCE\n"
+            f"[PROVENANCE] AUTONOMOUS AI AGENT TELEMETRY\n"
             f"• Engine: Autonomous AI Agent v2.1\n"
             f"• Dispatch Account: {self.sender_email}\n"
             f"• Verified Recipient: {draft.recipient_name} <{draft.recipient_email}>\n"
@@ -115,8 +115,9 @@ class SMTPSenderTool(BaseTool):
       {draft.body.replace(chr(10), '<br>')}
       
       <div class="telemetry-box">
-        <div class="telemetry-title">🤖 AI Agent Provenance & Execution Telemetry</div>
+        <div class="telemetry-title">[PROVENANCE] AI Agent Provenance & Execution Telemetry</div>
         <div class="telemetry-row"><strong>Engine:</strong> Autonomous AI Agent v2.1</div>
+
         <div class="telemetry-row"><strong>Architecture:</strong> LLM Reasoning + Working Memory + Tool Registry + Orchestration</div>
         <div class="telemetry-row"><strong>Dispatch Account:</strong> {self.sender_email}</div>
         <div class="telemetry-row"><strong>Verified Recipient:</strong> {draft.recipient_name} &lt;{draft.recipient_email}&gt;</div>

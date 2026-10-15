@@ -67,7 +67,7 @@
       justify-content: center;
       color: #fff;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
     }
     .account-badge {
@@ -104,207 +104,130 @@
       box-shadow: 0 0 8px #10b981;
     }
 
-    /* Layout */
+    /* Main Workspace */
     main {
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 1;
       display: grid;
-      grid-template-columns: 1fr 420px;
+      grid-template-columns: 1fr 380px;
+      height: calc(100vh - 60px);
       overflow: hidden;
     }
 
-    /* Left Chat Column */
+    /* Left Chat Stream */
     .chat-column {
       display: flex;
       flex-direction: column;
-      height: 100%;
-      min-height: 0;
       border-right: 1px solid var(--card-border);
-      background: #0b1120;
-      overflow: hidden;
+      background: rgba(15, 23, 42, 0.3);
+      height: 100%;
+      min-width: 0;
     }
-    .messages-area {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
+    .chat-stream {
+      flex: 1;
       padding: 24px;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 18px;
-      scroll-behavior: smooth;
     }
-
-    /* Scrollbar styling */
-    .messages-area::-webkit-scrollbar, .tab-pane::-webkit-scrollbar {
-      width: 6px;
-    }
-    .messages-area::-webkit-scrollbar-thumb, .tab-pane::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 4px;
-    }
-
     .message {
-      max-width: 88%;
-      padding: 16px 20px;
+      max-width: 82%;
+      padding: 14px 18px;
       border-radius: 12px;
-      font-size: 14.5px;
-      line-height: 1.6;
-      animation: msgPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @keyframes msgPop {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      line-height: 1.55;
+      font-size: 14px;
+      word-break: break-word;
     }
     .message.user {
       align-self: flex-end;
-      background: #2563eb;
+      background: var(--accent);
       color: #ffffff;
       border-bottom-right-radius: 4px;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
     }
     .message.assistant {
       align-self: flex-start;
       background: var(--card-bg);
-      color: var(--text-main);
       border: 1px solid var(--card-border);
+      color: var(--text-main);
       border-bottom-left-radius: 4px;
     }
-
-    /* Draft Review Card */
-    .draft-container {
-      background: #0f172a;
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      padding: 18px;
-      margin-top: 8px;
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
-    }
-    .draft-meta {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 8px 12px;
-      font-size: 13.5px;
-      margin-bottom: 14px;
-    }
-    .meta-label { color: var(--text-muted); font-weight: 500; }
-    .meta-value { color: var(--text-main); font-weight: 600; }
-    .draft-body-box {
-      background: #090d16;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: var(--font-stack);
-      font-size: 14px;
-      line-height: 1.6;
-      color: #e2e8f0;
-      white-space: pre-wrap;
-      margin-bottom: 16px;
-      max-height: 280px;
-      overflow-y: auto;
-    }
-    .draft-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .btn {
-      padding: 11px 22px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s ease;
-    }
-    .btn-send {
-      background: var(--success);
-      color: #ffffff;
-    }
-    .btn-send:hover {
-      background: var(--success-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-    }
-    .btn-discard {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-    }
-    .btn-discard:hover {
-      background: rgba(239, 68, 68, 0.2);
+    .message.system {
+      align-self: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--card-border);
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 90%;
+      text-align: center;
     }
 
     /* Quick Action Chips */
     .quick-bar {
       padding: 10px 24px;
-      background: var(--panel-bg);
+      background: rgba(15, 23, 42, 0.6);
       border-top: 1px solid var(--card-border);
       display: flex;
-      gap: 10px;
+      gap: 8px;
       overflow-x: auto;
+      white-space: nowrap;
       flex-shrink: 0;
-      z-index: 5;
+      scrollbar-width: thin;
     }
     .chip {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
       cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      flex-shrink: 0;
+      transition: all 0.15s ease;
+      font-weight: 500;
     }
     .chip:hover {
       background: var(--accent-subtle);
       border-color: var(--accent);
       color: #93c5fd;
-      transform: translateY(-1px);
     }
 
     /* Input Dock */
     .input-dock {
-      padding: 14px 24px;
+      padding: 16px 24px;
       background: var(--panel-bg);
       border-top: 1px solid var(--card-border);
       display: flex;
       gap: 12px;
       flex-shrink: 0;
-      z-index: 5;
     }
     .input-dock input {
       flex: 1;
-      background: #090d16;
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
-      padding: 14px 18px;
-      border-radius: 10px;
+      border-radius: 8px;
+      padding: 12px 16px;
       color: var(--text-main);
-      font-size: 15px;
+      font-size: 14px;
+      font-family: inherit;
       outline: none;
-      transition: all 0.15s;
+      transition: border-color 0.15s;
     }
     .input-dock input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px var(--accent-subtle);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
     }
     .btn-submit {
       background: var(--accent);
-      color: white;
-      padding: 0 24px;
-      border-radius: 10px;
-      font-size: 14.5px;
-      font-weight: 600;
+      color: #ffffff;
       border: none;
+      border-radius: 8px;
+      padding: 0 20px;
+      font-weight: 600;
+      font-size: 14px;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s;
     }
     .btn-submit:hover {
       background: var(--accent-hover);
@@ -316,20 +239,19 @@
       display: flex;
       flex-direction: column;
       height: 100%;
-      min-height: 0;
       overflow: hidden;
     }
     .nav-tabs {
       display: flex;
       border-bottom: 1px solid var(--card-border);
-      background: #090d16;
+      background: rgba(15, 23, 42, 0.8);
       flex-shrink: 0;
     }
     .nav-tab {
       flex: 1;
-      padding: 14px;
       text-align: center;
-      font-size: 13px;
+      padding: 12px 6px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -338,33 +260,35 @@
     }
     .nav-tab.active {
       color: #60a5fa;
-      border-bottom-color: #3b82f6;
-      background: rgba(59, 130, 246, 0.06);
+      border-bottom-color: var(--accent);
+      background: rgba(37, 99, 235, 0.05);
     }
     .tab-pane {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 20px;
       display: none;
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      flex-direction: column;
+      gap: 16px;
     }
-    .tab-pane.active { display: block; }
+    .tab-pane.active {
+      display: flex;
+    }
 
-    /* Cards */
+    /* Panel Card Elements */
     .panel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border-radius: 8px;
+      padding: 14px;
     }
     .panel-card-title {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.6px;
+      font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 12px;
-      font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -373,118 +297,205 @@
       display: flex;
       justify-content: space-between;
       font-size: 13px;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 8px;
     }
-    .info-row:last-child { border-bottom: none; }
+    .info-row:last-child { margin-bottom: 0; }
     .info-row span:first-child { color: var(--text-muted); }
-    .info-row span:last-child { color: var(--text-main); font-weight: 500; }
+
+    /* Draft Review Card inside Chat */
+    .draft-container {
+      margin-top: 10px;
+      background: #0f172a;
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 14px;
+      color: var(--text-main);
+    }
+    .draft-meta {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      row-gap: 6px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+    .draft-body-box {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .draft-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-send {
+      background: var(--success);
+      color: #ffffff;
+    }
+    .btn-send:hover { background: var(--success-hover); }
+    .btn-discard {
+      background: #334155;
+      color: var(--text-main);
+    }
+    .btn-discard:hover { background: #475569; }
 
     /* Contact Card */
     .contact-card {
-      background: #141c2b;
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .contact-card:hover {
-      border-color: #3b82f6;
-    }
-    .contact-name { font-weight: 600; font-size: 13.5px; color: #f8fafc; }
-    .contact-email { font-size: 12px; color: #60a5fa; font-family: ui-monospace, monospace; }
+    .contact-name { font-weight: 600; font-size: 13px; }
+    .contact-email { font-size: 12px; color: var(--text-muted); }
     .btn-tiny {
-      padding: 6px 12px;
-      border-radius: 6px;
-      background: rgba(37, 99, 235, 0.15);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      color: #93c5fd;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 4px 8px;
+      font-size: 11px;
+      background: #334155;
+      color: #fff;
+      border-radius: 4px;
+      border: none;
       cursor: pointer;
     }
-    .btn-tiny:hover { background: #2563eb; color: #fff; }
+    .btn-tiny:hover { background: var(--accent); }
 
-    /* Audit Item */
-    .audit-item {
-      background: #141c2b;
+    /* Audit & Task Items */
+    .audit-item, .task-item {
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px 14px;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .audit-time, .task-status-tag {
+      font-size: 11px;
+      color: #34d399;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .audit-subject, .task-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .audit-to, .task-next {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Form control */
+    .form-group {
       margin-bottom: 10px;
     }
-    .audit-time { font-size: 11px; color: #10b981; font-weight: 600; margin-bottom: 4px; }
-    .audit-subject { font-size: 13px; font-weight: 600; color: #f8fafc; }
-    .audit-to { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-    /* Form */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
     .form-group input {
       width: 100%;
       background: #090d16;
       border: 1px solid var(--card-border);
-      padding: 10px 12px;
       border-radius: 6px;
-      color: var(--text-main);
+      padding: 8px 10px;
+      color: #fff;
       font-size: 13px;
-      outline: none;
+      font-family: inherit;
     }
-    .form-group input:focus { border-color: var(--accent); }
   </style>
 </head>
 <body>
 
-  <!-- Top App Bar -->
+  <!-- Header -->
   <header>
     <div class="brand">
       <div class="brand-icon">AI</div>
-      <span>Autonomous AI Agent</span>
+      <div>
+        <div style="font-weight: 700; font-size: 15px;">Autonomous AI Agent</div>
+        <div style="font-size: 11px; color: var(--text-muted);">Multi-Domain Architecture &bull; Section 9 Compliant</div>
+      </div>
     </div>
-    <div class="account-badge">
-      <span>Active Account:</span>
-      <strong>vansh.jakhodia.btech2023@atlasskilltech.university</strong>
-    </div>
-    <div class="status-pill">
-      <span class="dot"></span>
-      <span id="agentStatePill">SYSTEM ONLINE</span>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div class="account-badge">
+        <span>Account:</span>
+        <strong id="senderEmail">vansh.jakhodia.btech2023@atlasskilltech.university</strong>
+      </div>
+      <div class="status-pill">
+        <div class="dot"></div>
+        <span id="agentStatePill">IDLE</span>
+      </div>
     </div>
   </header>
 
-  <!-- Main Split Work Area -->
+  <!-- Main Grid Workspace -->
   <main>
-    <!-- Left Chat Area -->
+    <!-- Left Chat Column -->
     <section class="chat-column">
-      <div class="messages-area" id="chatArea">
-        <div class="message assistant">
-          <strong>Autonomous AI Agent Initialized.</strong><br><br>
-          I plan, reason, resolve contacts, draft messages, enforce safety guardrails, and dispatch emails via Gmail SMTP.<br><br>
+      <div class="chat-stream" id="chatArea">
+        <div class="message system">
+          <strong>Autonomous AI Agent System Active</strong><br>
+          Operating across General Intelligence, Web Research, Code Execution, Workspace Documents, and Business Communications.<br>
           Click any quick action button below or type instructions directly.
         </div>
       </div>
 
-      <!-- Quick Action Buttons -->
+      <!-- Quick Action Buttons (Zero Emojis) -->
       <div class="quick-bar">
         <button class="chip" onclick="executePrompt('Send an email to Dr. Kunal Meher submitting my completed AI Agent assignment')">
-          ✉️ Email Dr. Kunal Meher
+          [DISPATCH] Email Dr. Kunal Meher
+        </button>
+        <button class="chip" onclick="executePrompt('calculate 25 * 40 + math.sqrt(144)')">
+          [MATH] Calculate 25 * 40 + sqrt(144)
+        </button>
+        <button class="chip" onclick="executePrompt('run code: print(\'Autonomous AI Agent operating across all 9 domains\')')">
+          [CODE] Run Python Code
+        </button>
+        <button class="chip" onclick="executePrompt('search web for Autonomous Agent architectures')">
+          [SEARCH] Research Web
+        </button>
+        <button class="chip" onclick="executePrompt('create task: Build autonomous AI Agent multi-agent system')">
+          [TASK] Initialize Section 9 Record
         </button>
         <button class="chip" onclick="executePrompt('Send an email to John reminding him about tomorrow\'s 10 AM meeting')">
-          📅 Meeting Reminder to John
+          [EMAIL] Reminder to John
         </button>
         <button class="chip" onclick="executePrompt('Send the same email to Sarah too')">
-          👥 Same Email to Sarah (Memory Reuse)
+          [MEMORY] Same to Sarah
         </button>
-        <button class="chip" onclick="executePrompt('Send an email to Bob about the product launch')">
-          🔍 Contact Verification (Bob)
+        <button class="chip" onclick="executePrompt('list files')">
+          [DOCS] List Workspace Files
         </button>
       </div>
 
       <!-- Bottom Chat Input -->
       <div class="input-dock">
-        <input type="text" id="promptInput" placeholder="Give an instruction (e.g. 'Send an email to John about tomorrow's 10 AM meeting')..." autocomplete="off" />
+        <input type="text" id="promptInput" placeholder="Give an instruction (e.g. 'calculate 125 * 8', 'search web for ...', 'send an email to ...')..." autocomplete="off" />
         <button class="btn-submit" id="sendBtn" onclick="sendUserMessage()">Send</button>
       </div>
     </section>
@@ -492,9 +503,10 @@
     <!-- Right Telemetry Deck -->
     <section class="telemetry-column">
       <div class="nav-tabs">
-        <div class="nav-tab active" id="tabBtn0" onclick="switchTab(0)">Agent State</div>
-        <div class="nav-tab" id="tabBtn1" onclick="switchTab(1)">Contacts (<span id="contactsCount">4</span>)</div>
-        <div class="nav-tab" id="tabBtn2" onclick="switchTab(2)">Sent Audit</div>
+        <div class="nav-tab active" id="tabBtn0" onclick="switchTab(0)">State</div>
+        <div class="nav-tab" id="tabBtn1" onclick="switchTab(1)">Tasks (<span id="tasksCount">0</span>)</div>
+        <div class="nav-tab" id="tabBtn2" onclick="switchTab(2)">Contacts (<span id="contactsCount">4</span>)</div>
+        <div class="nav-tab" id="tabBtn3" onclick="switchTab(3)">Audit Trail</div>
       </div>
 
       <!-- Tab 0: State & Memory Telemetry -->
@@ -525,14 +537,34 @@
 
         <div class="panel-card">
           <div class="panel-card-title">Active Memory Context</div>
-          <div id="memoryViewer" style="font-size: 12.5px; color: var(--text-muted); font-family: ui-monospace, monospace; white-space: pre-wrap; line-height: 1.5;">
+          <div id="memoryViewer" style="font-size: 12px; color: var(--text-muted); font-family: ui-monospace, monospace; white-space: pre-wrap; line-height: 1.4;">
 No pending draft in memory.
           </div>
         </div>
       </div>
 
-      <!-- Tab 1: Contacts Directory -->
+      <!-- Tab 1: Task Board (Section 9 Compliance) -->
       <div class="tab-pane" id="pane1">
+        <div class="panel-card">
+          <div class="panel-card-title">
+            <span>Active Tasks (Section 9)</span>
+            <button class="btn-tiny" onclick="loadTasks()">Refresh</button>
+          </div>
+          <div id="tasksContainer">Loading tasks...</div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-title">Create Structured Task</div>
+          <div class="form-group">
+            <label>Task Objective</label>
+            <input type="text" id="newTaskObjective" placeholder="e.g. Implement multi-agent consensus" />
+          </div>
+          <button class="btn btn-send" style="width: 100%; justify-content: center;" onclick="addNewTask()">+ Initialize Task</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Contacts Directory -->
+      <div class="tab-pane" id="pane2">
         <div class="panel-card">
           <div class="panel-card-title">
             <span>Verified Contacts</span>
@@ -559,8 +591,8 @@ No pending draft in memory.
         </div>
       </div>
 
-      <!-- Tab 2: Sent Audit Log -->
-      <div class="tab-pane" id="pane2">
+      <!-- Tab 3: Sent Audit Log -->
+      <div class="tab-pane" id="pane3">
         <div class="panel-card">
           <div class="panel-card-title">
             <span>Sent Messages Audit Trail</span>
@@ -577,8 +609,9 @@ No pending draft in memory.
     function switchTab(idx) {
       document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
       document.querySelectorAll('.tab-pane').forEach((p, i) => p.classList.toggle('active', i === idx));
-      if (idx === 1) loadContacts();
-      if (idx === 2) loadAuditHistory();
+      if (idx === 1) loadTasks();
+      if (idx === 2) loadContacts();
+      if (idx === 3) loadAuditHistory();
     }
 
     // Enter key listener
@@ -610,8 +643,7 @@ No pending draft in memory.
       msgDiv.className = 'message ' + role;
 
       if (draft) {
-        // If a draft is ready for confirmation, display a clean intro + Draft Card
-        msgDiv.innerHTML = `<strong>📝 Email Draft Ready for Review</strong><br><span style="color:var(--text-muted); font-size:13px;">Safety Guardrail: Sending is an irreversible action. Please inspect the draft and confirm when ready:</span>`;
+        msgDiv.innerHTML = `<strong>Email Draft Prepared (Review & Confirmation Required)</strong><br><span style="color:var(--text-muted); font-size:13px;">Safety Guardrail: Sending an email is an irreversible action. Review parameters:</span>`;
 
         const draftCard = document.createElement('div');
         draftCard.className = 'draft-container';
@@ -627,16 +659,15 @@ No pending draft in memory.
           <div class="draft-body-box">${draft.body}</div>
           <div class="draft-actions">
             <button class="btn btn-send" onclick="confirmAction('confirm')">
-              🚀 Send Email Now
+              Send Email Now
             </button>
             <button class="btn btn-discard" onclick="confirmAction('cancel')">
-              ✕ Discard Draft
+              Discard Draft
             </button>
           </div>
         `;
         msgDiv.appendChild(draftCard);
       } else {
-        // Normal formatted message
         let formattedText = text
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
@@ -671,6 +702,7 @@ No pending draft in memory.
         const data = await res.json();
         addMessage('assistant', data.message, data.requires_confirmation ? data.draft : null);
         loadAuditHistory();
+        loadTasks();
       } catch (err) {
         addMessage('assistant', 'Error communicating with AI Agent: ' + err);
       }
@@ -702,6 +734,7 @@ No pending draft in memory.
         document.getElementById('agentStatePill').innerText = data.state.toUpperCase().replace('_', ' ');
         document.getElementById('telState').innerText = data.state.toUpperCase();
         document.getElementById('telTurns').innerText = data.turns_count;
+        document.getElementById('tasksCount').innerText = data.tasks_count || 0;
 
         const memBox = document.getElementById('memoryViewer');
         if (data.pending_draft) {
@@ -712,6 +745,59 @@ No pending draft in memory.
           memBox.innerText = "No active draft in memory.\nTurns recorded: " + data.turns_count;
         }
       } catch (e) { console.error('fetchState error:', e); }
+    }
+
+    // Load tasks list
+    async function loadTasks() {
+      try {
+        const res = await fetch('/api/tasks');
+        const data = await res.json();
+        const list = data.tasks || [];
+        document.getElementById('tasksCount').innerText = list.length;
+        const container = document.getElementById('tasksContainer');
+
+        if (!list.length) {
+          container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">No tasks recorded yet.</span>';
+          return;
+        }
+
+        container.innerHTML = list.map(t => `
+          <div class="task-item">
+            <div class="task-status-tag">[${t.execution_status}] &bull; ID: ${t.task_id}</div>
+            <div class="task-title">${t.objective}</div>
+            <div class="task-next">Next Action: ${t.next_immediate_action}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('tasksContainer').innerText = 'Failed loading tasks.';
+      }
+    }
+
+    // Create new task
+    async function addNewTask() {
+      const objInput = document.getElementById('newTaskObjective');
+      const objective = objInput.value.trim();
+      if (!objective) {
+        alert('Please enter a task objective.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ objective: objective })
+        });
+        const data = await res.json();
+        if (data.success) {
+          objInput.value = '';
+          loadTasks();
+          fetchState();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed creating task: ' + err);
+      }
     }
 
     // Load contacts list
@@ -791,7 +877,7 @@ No pending draft in memory.
 
         container.innerHTML = list.map(item => `
           <div class="audit-item">
-            <div class="audit-time">✔ ${item.status} &bull; ${item.sent_at.slice(0, 19).replace('T', ' ')}</div>
+            <div class="audit-time">[SENT] ${item.status} &bull; ${item.sent_at.slice(0, 19).replace('T', ' ')}</div>
             <div class="audit-subject">${item.subject}</div>
             <div class="audit-to">To: ${item.recipient_name} &lt;${item.recipient_email}&gt;</div>
           </div>
@@ -803,6 +889,7 @@ No pending draft in memory.
 
     // Initial load
     fetchState();
+    loadTasks();
     loadContacts();
     loadAuditHistory();
   </script>

@@ -1,15 +1,18 @@
-"""OpenAI / OpenAI-compatible API client for LLM Reasoning."""
+"""OpenAI API client for LLM Reasoning and Intent Extraction."""
 
 from __future__ import annotations
 import json
+import urllib.request
+import urllib.error
 from typing import Optional, Dict, Any
 
 from agent.llm.base import BaseLLMClient, LLMPlan
 from agent.llm.rule_planner import RuleBasedPlanner
+from agent.prompt import MASTER_PROMPT
 
 
 class OpenAILLMClient(BaseLLMClient):
-    """Integrates OpenAI GPT models (e.g. gpt-4o-mini) with JSON structured outputs."""
+    """Integrates OpenAI GPT models with structured JSON output governed by the Master Prompt."""
 
     def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
         self.api_key = api_key
@@ -26,57 +29,86 @@ class OpenAILLMClient(BaseLLMClient):
         if not self.api_key:
             return self.fallback.plan(user_input, conversation_history, last_draft, contacts_summary)
 
+        url = "https://api.openai.com/v1/chat/completions"
+
+        system_prompt = (
+            f"{MASTER_PROMPT}\n\n"
+            "--- ORCHESTRATION INSTRUCTIONS ---\n"
+            "Analyze the user's latest input, conversation history, and current memory.\n"
+            "Return a JSON object with this EXACT structure:\n"
+            "{\n"
+            '  "intent": "compose_email" | "confirm_send" | "reject_send" | "provide_contact" | "list_contacts" | "view_history" | "execute_code" | "web_search" | "document_ops" | "task_ops" | "chat",\n'
+            '  "recipient_name": string or null,\n'
+            '  "recipient_email": string or null,\n'
+            '  "subject": string or null,\n'
+            '  "body": string or null,\n'
+            '  "tone": "professional" | "casual" | "urgent" | "friendly" | "formal",\n'
+            '  "reuse_context": boolean,\n'
+            '  "code": string or null,\n'
+            '  "expression": string or null,\n'
+            '  "query": string or null,\n'
+            '  "doc_action": "read" | "write" | "list" | "search" | null,\n'
+            '  "doc_path": string or null,\n'
+            '  "doc_content": string or null,\n'
+            '  "task_action": "create" | "update" | "get" | "list" | null,\n'
+            '  "task_objective": string or null,\n'
+            '  "task_steps": list of strings or null,\n'
+            '  "reasoning": string\n'
+            "}\n"
+        )
+
+        user_content = (
+            f"Known Contacts:\n{contacts_summary}\n\n"
+            f"Recent Conversation History:\n{conversation_history}\n\n"
+            f"Last Draft in Memory:\n{json.dumps(last_draft or {}, indent=2)}\n\n"
+            f"User Input:\n{user_input}\n"
+        )
+
+        payload = {
+            "model": self.model,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+            "temperature": 0.2,
+        }
+
         try:
-            from openai import OpenAI
-            client = OpenAI(api_key=self.api_key)
-
-            system_prompt = (
-                "You are the reasoning and planning module of an autonomous AI Agent.\n"
-                "Analyze the user's latest message, conversation history, and memory state.\n"
-                "Return a JSON object with this EXACT structure:\n"
-                "{\n"
-                '  "intent": "compose_email" | "confirm_send" | "reject_send" | "provide_contact" | "list_contacts" | "view_history" | "chat",\n'
-                '  "recipient_name": string or null,\n'
-                '  "recipient_email": string or null,\n'
-                '  "subject": string or null,\n'
-                '  "body": string or null,\n'
-                '  "tone": "professional" | "casual" | "urgent" | "friendly" | "formal",\n'
-                '  "reuse_context": boolean,\n'
-                '  "reasoning": string\n'
-                "}\n"
-                "CRITICAL: Never hallucinate email addresses. Only include email if provided by the user."
+            req_data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                url,
+                data=req_data,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_key}",
+                },
+                method="POST",
             )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                content = data["choices"][0]["message"]["content"]
+                parsed = json.loads(content)
 
-            user_prompt = (
-                f"Known Contacts:\n{contacts_summary}\n\n"
-                f"Conversation History:\n{conversation_history}\n\n"
-                f"Last Draft:\n{json.dumps(last_draft or {}, indent=2)}\n\n"
-                f"User Message:\n{user_input}\n"
-            )
-
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.2,
-            )
-
-            content = response.choices[0].message.content or "{}"
-            parsed = json.loads(content)
-
-            return LLMPlan(
-                intent=parsed.get("intent", "chat"),
-                recipient_name=parsed.get("recipient_name"),
-                recipient_email=parsed.get("recipient_email"),
-                subject=parsed.get("subject"),
-                body=parsed.get("body"),
-                tone=parsed.get("tone", "professional"),
-                reuse_context=bool(parsed.get("reuse_context", False)),
-                reasoning=parsed.get("reasoning", "Generated by OpenAI LLM"),
-                raw_response=content,
-            )
+                return LLMPlan(
+                    intent=parsed.get("intent", "chat"),
+                    recipient_name=parsed.get("recipient_name"),
+                    recipient_email=parsed.get("recipient_email"),
+                    subject=parsed.get("subject"),
+                    body=parsed.get("body"),
+                    tone=parsed.get("tone", "professional"),
+                    reuse_context=bool(parsed.get("reuse_context", False)),
+                    reasoning=parsed.get("reasoning", "Generated by OpenAI LLM"),
+                    raw_response=content,
+                    code=parsed.get("code"),
+                    expression=parsed.get("expression"),
+                    query=parsed.get("query"),
+                    doc_action=parsed.get("doc_action"),
+                    doc_path=parsed.get("doc_path"),
+                    doc_content=parsed.get("doc_content"),
+                    task_action=parsed.get("task_action"),
+                    task_objective=parsed.get("task_objective"),
+                    task_steps=parsed.get("task_steps"),
+                )
         except Exception:
             return self.fallback.plan(user_input, conversation_history, last_draft, contacts_summary)
