@@ -1,4 +1,4 @@
-"""Automated Demonstration of Experiment 9 - Autonomous AI Email Agent.
+"""Automated Demonstration of Autonomous AI Agent.
 
 Demonstrates:
 1. Understanding intent and entity extraction

@@ -1,6 +1,5 @@
-"""Professional CLI Interface for Autonomous AI Email Agent.
+"""Professional CLI Interface for Autonomous AI Agent.
 
-Assignment: Experiment 9 - Dr. Kunal Meher | Atlas SkillTech University
 Design: Modern, distraction-free terminal interface with clean panels and tables.
 """
 
@@ -20,14 +19,13 @@ console = Console()
 
 def print_banner(agent: AIAgent):
     table = Table(show_header=False, box=None, padding=(0, 1))
-    table.add_row("[bold white]ATLAS AI EMAIL AGENT[/bold white]", "[dim]Experiment 9[/dim]")
-    table.add_row("[dim]Student:[/dim] [cyan]Vansh Jakhodia[/cyan]", "[dim]Instructor:[/dim] [yellow]Dr. Kunal Meher[/yellow]")
+    table.add_row("[bold white]AUTONOMOUS AI AGENT[/bold white]", "[dim]v2.1[/dim]")
     table.add_row(
-        "[dim]Sender Account:[/dim] [blue]vansh.jakhodia.btech2023@atlasskilltech.university[/blue]",
+        "[dim]Active Account:[/dim] [blue]vansh.jakhodia.btech2023@atlasskilltech.university[/blue]",
         f"[dim]Dispatch Mode:[/dim] [{'bold green' if not agent.config.dry_run else 'bold yellow'}]{'LIVE GMAIL SMTP' if not agent.config.dry_run else 'DRY RUN'}[/]"
     )
 
-    console.print(Panel(table, border_style="blue", title="[bold cyan]● SYSTEM READY[/bold cyan]", subtitle="[dim]Type 'help' for examples or 'exit' to quit[/dim]"))
+    console.print(Panel(table, border_style="blue", title="[bold cyan]SYSTEM READY[/bold cyan]", subtitle="[dim]Type 'help' for examples or 'exit' to quit[/dim]"))
 
 
 def render_draft(draft):

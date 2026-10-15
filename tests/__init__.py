@@ -1,1 +1,1 @@
-"""Test suite for AI Email Agent."""
+"""Test suite for Autonomous AI Agent."""

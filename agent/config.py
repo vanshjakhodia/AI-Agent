@@ -1,4 +1,4 @@
-"""Configuration manager for the AI Email Agent."""
+"""Configuration manager for the Autonomous AI Agent."""
 
 from __future__ import annotations
 import os

@@ -220,7 +220,7 @@ class RuleBasedPlanner(BaseLLMClient):
                 f"Please let me know if you need to review the agenda items beforehand or if there are any conflicts.\n\n"
                 f"Looking forward to connecting.\n\n"
                 f"Best regards,\n"
-                f"AI Email Agent"
+                f"AI Agent"
             )
 
         # General reminder / prompt
@@ -231,5 +231,5 @@ class RuleBasedPlanner(BaseLLMClient):
             f"Details: {text}\n\n"
             f"Please feel free to reach out if you have any questions or require additional details.\n\n"
             f"Best regards,\n"
-            f"AI Email Agent"
+            f"AI Agent"
         )

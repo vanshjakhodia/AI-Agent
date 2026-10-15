@@ -33,7 +33,7 @@ EMAIL_REGEX = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
 
 
 class AIAgent:
-    """Production-grade AI Email Agent with safety guardrails and anti-hallucination."""
+    """Production-grade AI Agent with safety guardrails and anti-hallucination."""
 
     def __init__(
         self,
@@ -111,7 +111,7 @@ class AIAgent:
 
         # Default fallback / Help
         help_msg = (
-            "I am your autonomous Email Agent. Here is what I can do:\n"
+            "I am your autonomous AI Agent. Here is what I can do:\n"
             "• Draft and send emails: e.g. \"Send an email to John reminding him about tomorrow's 10 AM meeting\"\n"
             "• Submit assignments: e.g. \"Send an email to Dr. Kunal Meher submitting my Experiment 9 AI Agent assignment\"\n"
             "• Reuse context: e.g. \"Send the same email to Sarah too\"\n"

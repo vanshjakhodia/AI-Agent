@@ -31,7 +31,7 @@ class OpenAILLMClient(BaseLLMClient):
             client = OpenAI(api_key=self.api_key)
 
             system_prompt = (
-                "You are the reasoning and planning module of an autonomous AI Email Agent.\n"
+                "You are the reasoning and planning module of an autonomous AI Agent.\n"
                 "Analyze the user's latest message, conversation history, and memory state.\n"
                 "Return a JSON object with this EXACT structure:\n"
                 "{\n"

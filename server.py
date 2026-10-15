@@ -1,4 +1,4 @@
-"""FastAPI Web Server for Autonomous AI Email Agent.
+"""FastAPI Web Server for Autonomous AI Agent.
 
 Assignment: Experiment 9 - Autonomous AI Agent
 Production architecture: Serves clean responsive interface from templates/index.html.

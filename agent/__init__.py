@@ -1,4 +1,4 @@
-"""AI Email Agent Package
+"""Autonomous AI Agent Package
 An autonomous AI Agent demonstrating LLM reasoning, memory, tools, and safety guardrails.
 """
 

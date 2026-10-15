@@ -1,4 +1,4 @@
-"""Data models and schemas for the AI Email Agent."""
+"""Data models and schemas for the Autonomous AI Agent."""
 
 from __future__ import annotations
 from dataclasses import dataclass, field

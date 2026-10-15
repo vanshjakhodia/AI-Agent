@@ -1,4 +1,4 @@
-# 🤖 Autonomous AI Agent
+# Autonomous AI Agent
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
@@ -14,7 +14,7 @@
 
 ---
 
-## 📌 Theoretical Formulation
+## Theoretical Formulation
 
 An autonomous **AI Agent** is defined by four synergistic pillars:
 
@@ -51,28 +51,28 @@ flowchart TD
 
 ---
 
-## ⚡ Core Capabilities
+## Core Capabilities
 
-- 🧠 **Autonomous Intent and Entity Parsing:** Extracts recipient names, explicit email addresses, tones (`professional`, `urgent`, `casual`), subjects, and meeting times from free-form natural language.
-- 🛡️ **Strict Anti-Hallucination Policy:** The agent is programmatically forbidden from hallucinating email addresses. Unregistered contacts halt execution and trigger clarification prompts.
-- 🔐 **Human-in-the-Loop Safety Guardrail:** External dispatch is classified as an irreversible external action. The agent drafts the message, generates a visual review card, and waits for explicit user confirmation before transmission.
-- 👥 **Contextual State Reuse:** Follow-up instructions such as *"Send the same email to Sarah too"* automatically recover subjects, bodies, and meeting agendas from working memory without re-explaining.
-- 🚀 **Full-Stack Implementation:** Operates via a modern dark-mode Web Dashboard as well as an interactive terminal CLI.
-- 📜 **Cryptographic RFC 5322 Provenance:** Dispatched emails carry machine headers (`X-Mailer`, `X-AI-Agent-Framework`, `X-AI-Agent-Draft-ID`) and an in-body visual execution telemetry badge.
+- **Autonomous Intent and Entity Parsing:** Extracts recipient names, explicit email addresses, tones (`professional`, `urgent`, `casual`), subjects, and meeting times from free-form natural language.
+- **Strict Anti-Hallucination Policy:** The agent is programmatically forbidden from hallucinating email addresses. Unregistered contacts halt execution and trigger clarification prompts.
+- **Human-in-the-Loop Safety Guardrail:** External dispatch is classified as an irreversible external action. The agent drafts the message, generates a visual review card, and waits for explicit user confirmation before transmission.
+- **Contextual State Reuse:** Follow-up instructions such as *"Send the same email to Sarah too"* automatically recover subjects, bodies, and meeting agendas from working memory without re-explaining.
+- **Full-Stack Implementation:** Operates via a modern dark-mode Web Dashboard as well as an interactive terminal CLI.
+- **Cryptographic RFC 5322 Provenance:** Dispatched emails carry machine headers (`X-Mailer`, `X-AI-Agent-Framework`, `X-AI-Agent-Draft-ID`) and an in-body visual execution telemetry badge.
 
 ---
 
-## 🏗️ Architecture Breakdown
+## Architecture Breakdown
 
-### 🎨 Frontend Architecture
+### Frontend Architecture
 - **Framework:** Modern Single-Page Application (SPA) served via high-performance FastAPI endpoints.
 - **Styling:** Bespoke Apple / Linear-inspired dark-mode design system (`#090d16` background, `#1e293b` panels, crisp `1px` borders).
 - **Typography:** Native Apple & System font stack (`-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `Roboto`, `Helvetica Neue`).
 - **Interactive Split Deck:**
-  - **Left Deck (Conversation and Action Deck):** Chat timeline, quick action trigger chips, input dock, and dynamic **Draft Review Cards** with direct `[ 🚀 Send Email Now ]` and `[ ✕ Discard Draft ]` buttons.
+  - **Left Deck (Conversation and Action Deck):** Chat timeline, quick action trigger chips, input dock, and dynamic **Draft Review Cards** with direct `[ Send Email Now ]` and `[ Discard Draft ]` buttons.
   - **Right Deck (Telemetry and Inspector Deck):** Tabbed interface with real-time **Architecture Telemetry**, **Address Book Directory** with inline contact creation, and **Sent Messages Audit Ledger**.
 
-### ⚙️ Backend Architecture
+### Backend Architecture
 - **Runtime:** Python 3.10+ / FastAPI / Asynchronous Uvicorn.
 - **Orchestration Engine:** ReAct state-machine loop managing lifecycle transitions (`IDLE` $\leftrightarrow$ `AWAITING_CONTACT` $\leftrightarrow$ `AWAITING_CONFIRMATION` $\leftrightarrow$ `EXECUTING`).
 - **Hierarchical Memory Subsystem:**
@@ -86,7 +86,7 @@ flowchart TD
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 .
@@ -131,10 +131,10 @@ flowchart TD
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### 1. Installation
-Clone the repository and install the dependencies:
+Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/vanshjakhodia/AI-Agent.git
 cd AI-Agent
@@ -159,7 +159,7 @@ DRY_RUN=false
 
 ---
 
-## 💻 Running the Interfaces
+## Running the Interfaces
 
 ### Modern Web Dashboard (FastAPI)
 ```bash
@@ -198,7 +198,7 @@ tests/test_smtp.py::test_smtp_dry_run_generates_eml PASSED               [100%]
 
 ---
 
-## 🛡️ Provenance and Security Verification
+## Provenance and Security Verification
 
 Every email dispatched carries machine-readable headers verifiable via Gmail's **"Show Original"** feature:
 ```http
@@ -213,7 +213,7 @@ X-AI-Agent-Guardrail-Verification: Explicit Human-in-the-Loop Confirmation Verif
 
 ---
 
-## 📄 License & Rights
+## License and Rights
 
 This project is licensed under the **MIT License**.
 
