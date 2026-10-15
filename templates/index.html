@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Autonomous AI Agent</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --panel-bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-subtle: rgba(37, 99, 235, 0.15);
+      --success: #10b981;
+      --success-hover: #059669;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: var(--font-stack);
+      background: var(--bg);
+      color: var(--text-main);
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      height: 60px;
+      min-height: 60px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: -0.3px;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+    .account-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .account-badge strong { color: var(--text-main); }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* Layout */
+    main {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      overflow: hidden;
+    }
+
+    /* Left Chat Column */
+    .chat-column {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      border-right: 1px solid var(--card-border);
+      background: #0b1120;
+      overflow: hidden;
+    }
+    .messages-area {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    /* Scrollbar styling */
+    .messages-area::-webkit-scrollbar, .tab-pane::-webkit-scrollbar {
+      width: 6px;
+    }
+    .messages-area::-webkit-scrollbar-thumb, .tab-pane::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      line-height: 1.6;
+      animation: msgPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes msgPop {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message.user {
+      align-self: flex-end;
+      background: #2563eb;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Draft Review Card */
+    .draft-container {
+      background: #0f172a;
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 8px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+    }
+    .draft-meta {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 8px 12px;
+      font-size: 13.5px;
+      margin-bottom: 14px;
+    }
+    .meta-label { color: var(--text-muted); font-weight: 500; }
+    .meta-value { color: var(--text-main); font-weight: 600; }
+    .draft-body-box {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: var(--font-stack);
+      font-size: 14px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .draft-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn {
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .btn-send {
+      background: var(--success);
+      color: #ffffff;
+    }
+    .btn-send:hover {
+      background: var(--success-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .btn-discard {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .btn-discard:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    /* Quick Action Chips */
+    .quick-bar {
+      padding: 10px 24px;
+      background: var(--panel-bg);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+    .chip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .chip:hover {
+      background: var(--accent-subtle);
+      border-color: var(--accent);
+      color: #93c5fd;
+      transform: translateY(-1px);
+    }
+
+    /* Input Dock */
+    .input-dock {
+      padding: 14px 24px;
+      background: var(--panel-bg);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+    .input-dock input {
+      flex: 1;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      padding: 14px 18px;
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.15s;
+    }
+    .input-dock input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-subtle);
+    }
+    .btn-submit {
+      background: var(--accent);
+      color: white;
+      padding: 0 24px;
+      border-radius: 10px;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Right Telemetry Column */
+    .telemetry-column {
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .nav-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--card-border);
+      background: #090d16;
+      flex-shrink: 0;
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-tab.active {
+      color: #60a5fa;
+      border-bottom-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.06);
+    }
+    .tab-pane {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 20px;
+      display: none;
+    }
+    .tab-pane.active { display: block; }
+
+    /* Cards */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel-card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row span:first-child { color: var(--text-muted); }
+    .info-row span:last-child { color: var(--text-main); font-weight: 500; }
+
+    /* Contact Card */
+    .contact-card {
+      background: #141c2b;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .contact-card:hover {
+      border-color: #3b82f6;
+    }
+    .contact-name { font-weight: 600; font-size: 13.5px; color: #f8fafc; }
+    .contact-email { font-size: 12px; color: #60a5fa; font-family: ui-monospace, monospace; }
+    .btn-tiny {
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-tiny:hover { background: #2563eb; color: #fff; }
+
+    /* Audit Item */
+    .audit-item {
+      background: #141c2b;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .audit-time { font-size: 11px; color: #10b981; font-weight: 600; margin-bottom: 4px; }
+    .audit-subject { font-size: 13px; font-weight: 600; color: #f8fafc; }
+    .audit-to { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Form */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    .form-group input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+    }
+    .form-group input:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">AI</div>
+      <span>Autonomous AI Agent</span>
+    </div>
+    <div class="account-badge">
+      <span>Active Account:</span>
+      <strong>vansh.jakhodia.btech2023@atlasskilltech.university</strong>
+    </div>
+    <div class="status-pill">
+      <span class="dot"></span>
+      <span id="agentStatePill">SYSTEM ONLINE</span>
+    </div>
+  </header>
+
+  <!-- Main Split Work Area -->
+  <main>
+    <!-- Left Chat Area -->
+    <section class="chat-column">
+      <div class="messages-area" id="chatArea">
+        <div class="message assistant">
+          <strong>Autonomous AI Agent Initialized.</strong><br><br>
+          I plan, reason, resolve contacts, draft messages, enforce safety guardrails, and dispatch emails via Gmail SMTP.<br><br>
+          Click any quick action button below or type instructions directly.
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="quick-bar">
+        <button class="chip" onclick="executePrompt('Send an email to Dr. Kunal Meher submitting my completed AI Agent assignment')">
+          ✉️ Email Dr. Kunal Meher
+        </button>
+        <button class="chip" onclick="executePrompt('Send an email to John reminding him about tomorrow\'s 10 AM meeting')">
+          📅 Meeting Reminder to John
+        </button>
+        <button class="chip" onclick="executePrompt('Send the same email to Sarah too')">
+          👥 Same Email to Sarah (Memory Reuse)
+        </button>
+        <button class="chip" onclick="executePrompt('Send an email to Bob about the product launch')">
+          🔍 Contact Verification (Bob)
+        </button>
+      </div>
+
+      <!-- Bottom Chat Input -->
+      <div class="input-dock">
+        <input type="text" id="promptInput" placeholder="Give an instruction (e.g. 'Send an email to John about tomorrow's 10 AM meeting')..." autocomplete="off" />
+        <button class="btn-submit" id="sendBtn" onclick="sendUserMessage()">Send</button>
+      </div>
+    </section>
+
+    <!-- Right Telemetry Deck -->
+    <section class="telemetry-column">
+      <div class="nav-tabs">
+        <div class="nav-tab active" id="tabBtn0" onclick="switchTab(0)">Agent State</div>
+        <div class="nav-tab" id="tabBtn1" onclick="switchTab(1)">Contacts (<span id="contactsCount">4</span>)</div>
+        <div class="nav-tab" id="tabBtn2" onclick="switchTab(2)">Sent Audit</div>
+      </div>
+
+      <!-- Tab 0: State & Memory Telemetry -->
+      <div class="tab-pane active" id="pane0">
+        <div class="panel-card">
+          <div class="panel-card-title">Live Architecture Telemetry</div>
+          <div class="info-row">
+            <span>Agent State</span>
+            <span id="telState" style="color: #34d399; font-weight: 700;">IDLE</span>
+          </div>
+          <div class="info-row">
+            <span>SMTP Server</span>
+            <span>smtp.gmail.com:587</span>
+          </div>
+          <div class="info-row">
+            <span>Mode</span>
+            <span style="color: #60a5fa; font-weight: 600;">LIVE DISPATCH</span>
+          </div>
+          <div class="info-row">
+            <span>Safety Guardrail</span>
+            <span style="color: #fbbf24;">Confirmation Required</span>
+          </div>
+          <div class="info-row">
+            <span>Active Memory Turns</span>
+            <span id="telTurns">0</span>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-title">Active Memory Context</div>
+          <div id="memoryViewer" style="font-size: 12.5px; color: var(--text-muted); font-family: ui-monospace, monospace; white-space: pre-wrap; line-height: 1.5;">
+No pending draft in memory.
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 1: Contacts Directory -->
+      <div class="tab-pane" id="pane1">
+        <div class="panel-card">
+          <div class="panel-card-title">
+            <span>Verified Contacts</span>
+            <button class="btn-tiny" onclick="loadContacts()">Refresh</button>
+          </div>
+          <div id="contactsContainer">Loading contacts...</div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-card-title">Add New Contact</div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="newContactName" placeholder="e.g. Robert Downey" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="newContactEmail" placeholder="e.g. robert@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Role / Notes (Optional)</label>
+            <input type="text" id="newContactRole" placeholder="e.g. Software Architect" />
+          </div>
+          <button class="btn btn-send" style="width: 100%; justify-content: center;" onclick="addNewContact()">+ Save Contact</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Sent Audit Log -->
+      <div class="tab-pane" id="pane2">
+        <div class="panel-card">
+          <div class="panel-card-title">
+            <span>Sent Messages Audit Trail</span>
+            <button class="btn-tiny" onclick="loadAuditHistory()">Refresh</button>
+          </div>
+          <div id="auditContainer">No sent emails recorded yet.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(idx) {
+      document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-pane').forEach((p, i) => p.classList.toggle('active', i === idx));
+      if (idx === 1) loadContacts();
+      if (idx === 2) loadAuditHistory();
+    }
+
+    // Enter key listener
+    document.getElementById('promptInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendUserMessage();
+      }
+    });
+
+    // Execute quick action chip
+    function executePrompt(text) {
+      document.getElementById('promptInput').value = text;
+      sendUserMessage();
+    }
+
+    // Scroll chat area to bottom smoothly
+    function scrollToBottom() {
+      const container = document.getElementById('chatArea');
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+      }, 30);
+    }
+
+    // Append formatted message to chat
+    function addMessage(role, text, draft = null) {
+      const container = document.getElementById('chatArea');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + role;
+
+      if (draft) {
+        // If a draft is ready for confirmation, display a clean intro + Draft Card
+        msgDiv.innerHTML = `<strong>📝 Email Draft Ready for Review</strong><br><span style="color:var(--text-muted); font-size:13px;">Safety Guardrail: Sending is an irreversible action. Please inspect the draft and confirm when ready:</span>`;
+
+        const draftCard = document.createElement('div');
+        draftCard.className = 'draft-container';
+        draftCard.innerHTML = `
+          <div class="draft-meta">
+            <span class="meta-label">To:</span>
+            <span class="meta-value">${draft.recipient_name} &lt;${draft.recipient_email}&gt;</span>
+            <span class="meta-label">Subject:</span>
+            <span class="meta-value">${draft.subject}</span>
+            <span class="meta-label">Tone:</span>
+            <span class="meta-value" style="text-transform:capitalize;">${draft.tone}</span>
+          </div>
+          <div class="draft-body-box">${draft.body}</div>
+          <div class="draft-actions">
+            <button class="btn btn-send" onclick="confirmAction('confirm')">
+              🚀 Send Email Now
+            </button>
+            <button class="btn btn-discard" onclick="confirmAction('cancel')">
+              ✕ Discard Draft
+            </button>
+          </div>
+        `;
+        msgDiv.appendChild(draftCard);
+      } else {
+        // Normal formatted message
+        let formattedText = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px; font-size:13px;">$1</code>');
+
+        msgDiv.innerHTML = formattedText;
+      }
+
+      container.appendChild(msgDiv);
+      scrollToBottom();
+      fetchState();
+    }
+
+    // Send user message to agent
+    async function sendUserMessage() {
+      const input = document.getElementById('promptInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      addMessage('user', text);
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        addMessage('assistant', data.message, data.requires_confirmation ? data.draft : null);
+        loadAuditHistory();
+      } catch (err) {
+        addMessage('assistant', 'Error communicating with AI Agent: ' + err);
+      }
+    }
+
+    // Confirm or cancel draft
+    async function confirmAction(actionType) {
+      addMessage('user', actionType === 'confirm' ? 'Send email now' : 'Cancel draft');
+      try {
+        const res = await fetch('/api/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: actionType })
+        });
+        const data = await res.json();
+        addMessage('assistant', data.message);
+        loadAuditHistory();
+        fetchState();
+      } catch (err) {
+        addMessage('assistant', 'Action failed: ' + err);
+      }
+    }
+
+    // Fetch live agent state and telemetry
+    async function fetchState() {
+      try {
+        const res = await fetch('/api/state');
+        const data = await res.json();
+        document.getElementById('agentStatePill').innerText = data.state.toUpperCase().replace('_', ' ');
+        document.getElementById('telState').innerText = data.state.toUpperCase();
+        document.getElementById('telTurns').innerText = data.turns_count;
+
+        const memBox = document.getElementById('memoryViewer');
+        if (data.pending_draft) {
+          memBox.innerText = "Active Pending Draft:\n" + JSON.stringify(data.pending_draft, null, 2);
+        } else if (data.last_draft) {
+          memBox.innerText = "Last Draft in Memory (Context Reuse Available):\n" + JSON.stringify(data.last_draft, null, 2);
+        } else {
+          memBox.innerText = "No active draft in memory.\nTurns recorded: " + data.turns_count;
+        }
+      } catch (e) { console.error('fetchState error:', e); }
+    }
+
+    // Load contacts list
+    async function loadContacts() {
+      try {
+        const res = await fetch('/api/contacts');
+        const list = await res.json();
+        document.getElementById('contactsCount').innerText = list.length;
+        const container = document.getElementById('contactsContainer');
+
+        if (!list.length) {
+          container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">No contacts found.</span>';
+          return;
+        }
+
+        container.innerHTML = list.map(c => `
+          <div class="contact-card">
+            <div>
+              <div class="contact-name">${c.name} ${c.role ? '<span style="font-size:11px; color:#94a3b8; font-weight:400;">(' + c.role + ')</span>' : ''}</div>
+              <div class="contact-email">${c.email}</div>
+            </div>
+            <button class="btn-tiny" onclick="executePrompt('Send an email to ${c.name}')">Email</button>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('contactsContainer').innerText = 'Failed loading contacts.';
+      }
+    }
+
+    // Add new contact
+    async function addNewContact() {
+      const nameInput = document.getElementById('newContactName');
+      const emailInput = document.getElementById('newContactEmail');
+      const roleInput = document.getElementById('newContactRole');
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const role = roleInput.value.trim();
+
+      if (!name || !email) {
+        alert('Please provide both name and email.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, role })
+        });
+        const data = await res.json();
+        if (data.success) {
+          nameInput.value = '';
+          emailInput.value = '';
+          roleInput.value = '';
+          loadContacts();
+          alert('Contact ' + name + ' registered successfully!');
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('Failed adding contact: ' + err);
+      }
+    }
+
+    // Load audit log history
+    async function loadAuditHistory() {
+      try {
+        const res = await fetch('/api/history');
+        const list = await res.json();
+        const container = document.getElementById('auditContainer');
+
+        if (!list.length) {
+          container.innerHTML = '<span style="font-size:12px; color:#94a3b8;">No sent emails recorded yet.</span>';
+          return;
+        }
+
+        container.innerHTML = list.map(item => `
+          <div class="audit-item">
+            <div class="audit-time">✔ ${item.status} &bull; ${item.sent_at.slice(0, 19).replace('T', ' ')}</div>
+            <div class="audit-subject">${item.subject}</div>
+            <div class="audit-to">To: ${item.recipient_name} &lt;${item.recipient_email}&gt;</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('auditContainer').innerText = 'Failed loading audit history.';
+      }
+    }
+
+    // Initial load
+    fetchState();
+    loadContacts();
+    loadAuditHistory();
+  </script>
+</body>
+</html>

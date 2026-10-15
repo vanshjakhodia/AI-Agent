@@ -1,0 +1,67 @@
+[
+  {
+    "record_id": "rec_12af9e45",
+    "draft_id": "draft_8ccfe7e7",
+    "recipient_name": "John Doe",
+    "recipient_email": "john.doe@example.com",
+    "subject": "Meeting Reminder: Tomorrow at 10 AM",
+    "body": "Dear John Doe,\n\nThis is a gentle reminder regarding our scheduled meeting tomorrow at 10:00 AM.\n\nPlease let me know if you need to review the agenda items beforehand or if there are any conflicts.\n\nLooking forward to connecting.\n\nBest regards,\nAI Email Agent",
+    "sent_at": "2026-10-15T10:35:42.401989",
+    "status": "SENT_DRY_RUN",
+    "is_dry_run": true,
+    "message_id": "<179204074240.62018.13583814306995499752@agent.atlas-ai>",
+    "error": null
+  },
+  {
+    "record_id": "rec_149f8777",
+    "draft_id": "draft_e9a8f4b0",
+    "recipient_name": "Sarah Connor",
+    "recipient_email": "sarah.connor@example.com",
+    "subject": "Meeting Reminder: Tomorrow at 10 AM",
+    "body": "Dear Sarah,\n\nThis is a gentle reminder regarding our scheduled meeting tomorrow at 10:00 AM.\n\nPlease let me know if you need to review the agenda items beforehand or if there are any conflicts.\n\nLooking forward to connecting.\n\nBest regards,\nAI Email Agent",
+    "sent_at": "2026-10-15T10:35:43.026792",
+    "status": "SENT_DRY_RUN",
+    "is_dry_run": true,
+    "message_id": "<179204074302.62018.3493635488151345826@agent.atlas-ai>",
+    "error": null
+  },
+  {
+    "record_id": "rec_965004c6",
+    "draft_id": "draft_c11b6b68",
+    "recipient_name": "Dr. Kunal Meher",
+    "recipient_email": "kunal.meher@atlasuniversity.edu.in",
+    "subject": "Submission: Experiment 9 - Autonomous AI Agent",
+    "body": "Dear Dr. Kunal Meher,\n\nI hope this email finds you well.\n\nI am pleased to submit my completed work for Experiment 9: Build an AI Agent. The agent incorporates all four required pillars:\n1. LLM Reasoning & Planning (Intent extraction, entity parsing, tone adaptation)\n2. Working Memory (Short-term context reuse, long-term contacts & audit log)\n3. Tool Suite (Anti-hallucination contact lookup, drafting, SMTP transmission)\n4. Orchestration & Safety Guardrails (Irreversible action human-in-the-loop confirmation)\n\nThis email was drafted and autonomously dispatched through the AI Agent's SMTP tool with verified recipient lookup.\n\nThank you for your guidance.\n\nBest regards,\nAI Agent Student",
+    "sent_at": "2026-10-15T10:35:43.655187",
+    "status": "SENT_DRY_RUN",
+    "is_dry_run": true,
+    "message_id": "<179204074365.62018.12822177145975275657@agent.atlas-ai>",
+    "error": null
+  },
+  {
+    "record_id": "rec_09c092ba",
+    "draft_id": "draft_5068df51",
+    "recipient_name": "",
+    "recipient_email": "jakhodiavansh07@gmail.com",
+    "subject": "Submission: Experiment 9 - Autonomous AI Agent",
+    "body": "Dear there,\n\nI hope this email finds you well.\n\nI am pleased to submit my completed work for Experiment 9: Build an AI Agent.\n\nThe autonomous AI Agent architecture incorporates all four fundamental pillars:\n1. LLM Reasoning & Planning: Autonomous intent extraction, entity parsing, and tone-adaptive generation\n2. Working Memory: Short-term contextual state reuse across turns and long-term persistent contact & audit storage\n3. Tool Suite: Strict anti-hallucination contact resolution, MIME draft creation, and Gmail SMTP transmission\n4. Orchestration & Guardrails: State machine with human-in-the-loop verification for irreversible external actions\n\nThis email was generated and dispatched through the AI Agent's verified SMTP pipeline.\n\nBest regards,\nVansh Jakhodia",
+    "sent_at": "2026-10-15T10:59:06.096948",
+    "status": "DELIVERED",
+    "is_dry_run": false,
+    "message_id": "<179204214609.63264.3930777054854782671@agent.atlas-ai>",
+    "error": null
+  },
+  {
+    "record_id": "rec_d1c521f0",
+    "draft_id": "draft_c1abb594",
+    "recipient_name": "Dr. Kunal Meher",
+    "recipient_email": "kunal.meher@atlasuniversity.edu.in",
+    "subject": "Submission: Experiment 9 - Autonomous AI Agent",
+    "body": "Dear Dr. Kunal Meher,\n\nI hope this email finds you well.\n\nI am pleased to submit my completed work for Experiment 9: Build an AI Agent.\n\nThe autonomous AI Agent architecture incorporates all four fundamental pillars:\n1. LLM Reasoning & Planning: Autonomous intent extraction, entity parsing, and tone-adaptive generation\n2. Working Memory: Short-term contextual state reuse across turns and long-term persistent contact & audit storage\n3. Tool Suite: Strict anti-hallucination contact resolution, MIME draft creation, and Gmail SMTP transmission\n4. Orchestration & Guardrails: State machine with human-in-the-loop verification for irreversible external actions\n\nThis email was generated and dispatched through the AI Agent's verified SMTP pipeline.\n\nBest regards,\nVansh Jakhodia",
+    "sent_at": "2026-10-15T11:06:22.675568",
+    "status": "DELIVERED",
+    "is_dry_run": false,
+    "message_id": "<179204258267.63441.16106109980709186545@agent.atlas-ai>",
+    "error": null
+  }
+]

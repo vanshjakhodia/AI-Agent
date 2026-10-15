@@ -1,0 +1,76 @@
+[
+  {
+    "id": "c_kunal_meher",
+    "name": "Dr. Kunal Meher",
+    "email": "kunal.meher@atlasuniversity.edu.in",
+    "aliases": [
+      "kunal",
+      "dr kunal",
+      "dr. kunal",
+      "prof meher",
+      "professor kunal meher",
+      "kunal meher"
+    ],
+    "role": "Faculty / Professor",
+    "organization": "Atlas SkillTech University",
+    "notes": "Course Instructor for AI Agent Experiment 9"
+  },
+  {
+    "id": "c_john_doe",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "aliases": [
+      "john",
+      "johnny"
+    ],
+    "role": "Product Manager",
+    "organization": "Acme Corp",
+    "notes": "Project collaborator"
+  },
+  {
+    "id": "c_sarah_connor",
+    "name": "Sarah Connor",
+    "email": "sarah.connor@example.com",
+    "aliases": [
+      "sarah"
+    ],
+    "role": "Engineering Lead",
+    "organization": "Tech Innovations",
+    "notes": "Team lead for software initiatives"
+  },
+  {
+    "id": "c_alice_smith",
+    "name": "Alice Smith",
+    "email": "alice.smith@example.com",
+    "aliases": [
+      "alice"
+    ],
+    "role": "UI/UX Designer",
+    "organization": "Design Studio",
+    "notes": "Lead designer"
+  },
+  {
+    "id": "c_7d0cb0e0",
+    "name": "Bob",
+    "email": "bob.smith@techcorp.io",
+    "aliases": [
+      "bob"
+    ],
+    "role": null,
+    "organization": null,
+    "notes": "Added dynamically during conversation flow"
+  },
+  {
+    "id": "c_vansh_personal",
+    "name": "Vansh Jakhodia",
+    "email": "jakhodiavansh07@gmail.com",
+    "aliases": [
+      "vansh",
+      "me",
+      "myself"
+    ],
+    "role": "Lead Developer",
+    "organization": "Atlas SkillTech",
+    "notes": "Personal verification email"
+  }
+]
